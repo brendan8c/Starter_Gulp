@@ -1,0 +1,16 @@
+@import "vars";
+@import "fonts";
+@import "global";
+// ============================
+:root {
+    --fs: 1rem;
+}
+
+$red: red;
+body {
+    @include f500;
+    font-size: var(--fs);
+    line-height: 27px;
+    font-weight: 300;
+    color: #838383;
+}

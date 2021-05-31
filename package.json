@@ -1,0 +1,44 @@
+{
+    "name": "start_gulp",
+    "version": "1.0.0",
+    "description": "gulp",
+    "main": "gulpfile.js",
+    "scripts": {
+        "test": "test"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/brendan8c/start_gulp.git"
+    },
+    "author": "Brendan8c",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/brendan8c/start_gulp/issues"
+    },
+    "homepage": "https://github.com/brendan8c/start_gulp#readme",
+    "devDependencies": {
+        "@babel/core": "^7.14.3",
+        "@babel/preset-env": "^7.14.4",
+        "autoprefixer": "^10.2.6",
+        "browser-sync": "^2.26.14",
+        "cssnano": "^5.0.5",
+        "del": "^6.0.0",
+        "gulp": "^4.0.2",
+        "gulp-babel": "^8.0.0",
+        "gulp-concat": "^2.6.1",
+        "gulp-file-include": "^2.3.0",
+        "gulp-htmlmin": "^5.0.1",
+        "gulp-postcss": "^9.0.0",
+        "gulp-sass": "^4.1.0",
+        "gulp-size": "^4.0.0",
+        "gulp-sourcemaps": "^3.0.0",
+        "gulp-terser": "^2.0.1",
+        "gulp-ttf2woff": "^1.1.1",
+        "gulp-ttf2woff2": "^4.0.1",
+        "postcss": "^8.3.0"
+    },
+    "dependencies": {
+        "jquery": "^3.6.0",
+        "normalize.css": "^8.0.1"
+    }
+}

@@ -1,0 +1,1 @@
+{"version":3,"names":[],"mappings":"","sources":["parts/footer.html"],"sourcesContent":["<!-- #1grn  Footer -->\r\n<footer class=\"footer\">\r\n    <div class=\"container\"></div>\r\n</footer>\r\n\r\n<script src=\"js/libs.min.js\"></script>\r\n<script src=\"js/main.min.js\"></script>\r\n</body>\r\n\r\n</html>"],"file":"../../html/parts/footer.html"}
