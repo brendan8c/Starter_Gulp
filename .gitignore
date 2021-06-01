@@ -7,3 +7,5 @@ package-lock.json
 .code-workspace
 desktop.ini
 GitHub.ico
+sourcemaps
+build
