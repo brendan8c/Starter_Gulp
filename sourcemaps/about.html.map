@@ -1,1 +1,0 @@
-{"version":3,"names":[],"mappings":"","sources":["about.html"],"sourcesContent":["<!-- #2pur поключаю header -->\r\n@@include('parts/header.html')\r\n<h1>About page</h1>\r\n<!-- #2pur поключаю footer -->\r\n@@include('parts/footer.html')"],"file":"../html/about.html"}
