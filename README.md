@@ -70,7 +70,9 @@
 "dependencies": Пакеты, необходимые для работы вашего приложения.<br>
 "devDependencies": Пакеты, необходимые только для локальной разработки и тестирования.<br>
 
-Чтобы добавить зависимости в "devDependencies" выполните следующую команду: `npm install <имя-пакета> --save-dev` Краткий пример: `npm i -D normalize.css`<br>
-Чтобы добавить зависимости в "dependencies" выполните следующую команду: `npm install <имя-пакета> --save-prod` Краткий пример: `npm i -P normalize.css`<br>
+Чтобы добавить зависимости в "devDependencies" выполните следующую команду:<br>
+`npm install <имя-пакета> --save-dev` Краткий пример: `npm i -D normalize.css`<br>
+Чтобы добавить зависимости в "dependencies" выполните следующую команду:<br>
+`npm install <имя-пакета> --save-prod` Краткий пример: `npm i -P normalize.css`<br>
 
 При запуске `npm i`, npm загрузит зависимости из devDependencies, перечисленные в, package.json<br>
