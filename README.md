@@ -1,10 +1,10 @@
-<img src=https://raw.githubusercontent.com/Brendan8c/start_gulp/master/img/gulp.png width="100%">
+<img src=https://raw.githubusercontent.com/Brendan8c/start_gulp/master/img/Gulp.png width="100%">
 
 <table align="center">
     <tr>
         <td rowspan="2">
             <a href="https://github.com/gulpjs/gulp">
-                <img src=https://raw.githubusercontent.com/Brendan8c/start_gulp/master/img/gulp.svg width="70px" style="margin-top:-50px">
+                <img src=https://raw.githubusercontent.com/Brendan8c/start_gulp/master/img/Gulp.svg width="70px" style="margin-top:-50px">
             </a>
         </td>
         <td colspan="2">
