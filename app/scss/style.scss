@@ -13,4 +13,37 @@ body {
     line-height: 27px;
     font-weight: 300;
     color: #838383;
+    background-color: #ffffff;
+}
+
+.navigation {
+    ul {
+        display: flex;
+        flex-wrap: wrap;
+    }
+}
+
+.box {
+    width: 500px;
+    height: 500px;
+    background-repeat: no-repeat;
+    background-position: center;
+    // position: absolute;
+    // z-index: 1;
+}
+
+.box1 {
+    background-image: url(../img/mr-robot-mask-f-society-artwork-4k-on.jpg);
+}
+
+.box2 {
+    background-image: url(../img/mr-robot-tv-show-2-ap-3840x2160.jpg);
+}
+
+.box3 {
+    background-image: url(../img/NV8Y1SZ0A51O1533575177105.jpg);
+}
+
+.box4 {
+    background-image: url(../img/P928TGX6VJ7M1533575234536.jpg);
 }

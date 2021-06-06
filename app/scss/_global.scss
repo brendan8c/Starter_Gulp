@@ -87,6 +87,7 @@ video {
     vertical-align: baseline;
 }
 
+div,
 article,
 aside,
 details,
@@ -152,11 +153,10 @@ table {
     border-spacing: 0;
 }
 
-img {
-    max-width: 100%;
-    display: block;
-}
-
+// img {
+//     max-width: 100%;
+//     display: block;
+// }
 article>*+* {
     margin-top: 1em;
 }
