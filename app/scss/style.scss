@@ -3,13 +3,15 @@
 @import "global";
 // ============================
 :root {
-    --fs: 1rem;
+    --fs: 2vw;
 }
 
 $red: red;
 body {
-    @include f500;
+    // @include f500;
+    font-family: 'Museo Cyrl 500';
     font-size: var(--fs);
+    // font-size: 20px;
     line-height: 27px;
     font-weight: 300;
     color: #838383;
@@ -23,13 +25,16 @@ body {
     }
 }
 
+.boxwrap {
+    position: relative;
+}
+
 .box {
     width: 500px;
     height: 500px;
     background-repeat: no-repeat;
     background-position: center;
-    // position: absolute;
-    // z-index: 1;
+    background-size: cover;
 }
 
 .box1 {
@@ -46,4 +51,8 @@ body {
 
 .box4 {
     background-image: url(../img/P928TGX6VJ7M1533575234536.jpg);
+}
+
+.box5 {
+    background-image: url(../img/dior.jpg);
 }

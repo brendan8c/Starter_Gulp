@@ -17,8 +17,10 @@ const terser = require('gulp-terser') // Инструмент для сжати�
 const ttf2woff = require('gulp-ttf2woff') // Конвертировать шрифт из ttf в woff
 const ttf2woff2 = require('gulp-ttf2woff2') // Конвертировать шрифт из ttf в woff2
 const size = require('gulp-size') // Регистрирует общий размер файлов в потоке и возможно отдельные размеры файлов. Размер фалов будет показан в терминале при сборке.
-const sprites = require('postcss-sprites') // Плагин PostCSS, который генерирует таблицы спрайтов из ваших таблиц стилей.
-const replace = require('replace-in-file') // Простая утилита для быстрой замены текста в одном или нескольких файлах.
+    // const replace = require('replace-in-file') // Простая утилита для быстрой замены текста в одном или нескольких файлах.
+const pxtorem = require('postcss-pxtorem') // Плагин который генерирует единицы rem из единиц px.
+const posthtml = require('gulp-posthtml') // Это инструмент для преобразования HTML/XML с помощью плагинов JS.
+const posthtmlPostcss = require('posthtml-postcss') // Использовать PostCSS в HTML.
 
 const config = {
     // Сырые файлы
@@ -63,12 +65,37 @@ const config_JS2_size = { title: '-------------------------------------------- m
 const config_IMG_size = { title: '-------------------------------------------- IMG: ' }
 const config_ALL_size = { title: '-------------------------------------------- All project: ' }
 
+
 // Компилирует HTML файлы
 function html() {
+    const postcssPlugins = [
+        autoprefixer({
+            overrideBrowserslist: [
+                '>0.25%',
+                'not ie 11',
+                'not op_mini all'
+            ]
+        }),
+        pxtorem({
+            rootValue: 16,
+            unitPrecision: 5,
+            propList: ['font', 'font-size', 'line-height', 'letter-spacing'],
+            replace: false,
+            mediaQuery: false,
+            minPixelValue: 0,
+        })
+    ];
+    const postcssOptions = { from: undefined }
+    const filterType = /^text\/css$/
+    const plugins = [
+        // Подключаем плагины 'autoprefixer' и 'pxtorem' через плагин 'posthtml-postcss'. В опциях для PostCss выставляем значение 'undefined' для отключения ошибки.
+        posthtmlPostcss(postcssPlugins, postcssOptions, filterType)
+    ];
     return src(config.app.html)
         .pipe(include({ // Подключаем через @@include() файлы html к основному.
             prefix: '@@'
         }))
+        .pipe(posthtml(plugins))
         .pipe(htmlmin({ // Минифицируем HTML. (https://github.com/kangax/html-minifier#options-quick-reference)
             collapseWhitespace: true, // Удаляем пробелы.
             // preserveLineBreaks: true, // Всегда сворачивайте до 1 разрыва строки (никогда не удаляйте его полностью), если пробелы между тегами включают разрыв строки.
@@ -89,22 +116,22 @@ function html() {
 }
 
 function scss() {
-    let plugins = [
-        sprites({
-            stylesheetPath: build,
-            styleFilePath: config.build.style + '/style.min.css', // Абсолютный путь к таблице стилей CSS. /Path/to/your/source/stylesheet.css
-            spritePath: (('img'), ('build/img')), // Относительный путь к созданной таблице спрайтов. dist/sprite.png
-            basePath: build, // Ваш базовый путь, который будет использоваться для изображений с абсолютными URL-адресами CSS.
-            spritesmith: { padding: 4 },
-            retina: 2,
-            hooks: false
-        }),
+    const plugins = [
         autoprefixer({
+            // browsers: 'last 1 version'
             overrideBrowserslist: [
                 '>0.25%',
                 'not ie 11',
                 'not op_mini all'
             ]
+        }),
+        pxtorem({
+            rootValue: 16, // Представляет размер шрифта корневого элемента.
+            unitPrecision: 5, // Десятичные числа, до которых могут вырасти единицы REM.
+            propList: ['font', 'font-size', 'line-height', 'letter-spacing'], // Свойства, которые могут изменяться с px на rem.
+            replace: false, // Заменяет правила, содержащие rems, вместо добавления резервных вариантов.
+            mediaQuery: false, // Разрешить преобразование px в медиа-запросах.
+            minPixelValue: 0, // Установите минимальное значение заменяемого пикселя.
         }),
         cssnano()
     ];
@@ -113,21 +140,21 @@ function scss() {
         .pipe(sourcemaps.init({ loadMaps: true })) // Чтобы загрузить существующие исходные карты.
         .pipe(sourcemaps.identityMap()) // Позволяет сгенерировать полную действительную исходную карту с кодировкой без изменений.
         .pipe(sass()) // Скомпилировали SCSS в CSS.
-        .pipe(postcss(plugins))
         .pipe(concat('style.min.css')) // Объединяем CSS файлы в один файл.
+        .pipe(postcss(plugins))
         .pipe(sourcemaps.write('../sourcemaps/'))
         .pipe(dest(config.build.style)) // Перемещаем в папку готовой сборки.
 }
 
 // Заменяем все найденный строки в style.min.css.
-function updateRedirects(done) {
-    replace({
-        files: 'build/css/style.min.css',
-        from: /img\/sprite.png/g, // Ищем эти строки img/sprite.png
-        to: '../img/sprite.png', // Заменяем на ../img/sprite.png
-        countMatches: true,
-    }, done)
-}
+// function updateRedirects(done) {
+//     replace({
+//         files: 'build/css/style.min.css',
+//         from: /img\/sprite.png/g, // Ищем эти строки img/sprite.png
+//         to: '../img/sprite.png', // Заменяем на ../img/sprite.png
+//         countMatches: true,
+//     }, done)
+// }
 
 // Компилирует JavaScript файлы
 function javaScript() {
@@ -161,7 +188,7 @@ function imgConverter() {
 
 //—————————————————————— Подключаем CSS файлы и минифицируем их в libs.min.css ——————————————————————
 function css() {
-    let plugins = [
+    const plugins = [
         autoprefixer({
             overrideBrowserslist: [
                 '>0.25%',
@@ -178,7 +205,6 @@ function css() {
         .pipe(sourcemaps.identityMap())
         .pipe(postcss(plugins))
         .pipe(concat('libs.min.css'))
-        // .pipe(sourcemaps.write('../sourcemaps/'))
         .pipe(sourcemaps.write('../sourcemaps/'))
         .pipe(dest(config.build.style))
 }
@@ -267,7 +293,7 @@ function stream() {
 
 // Экспортируем задачи для сборки проекта или запуска в режиме разработки.
 // Вызываем по очерёдно задачи. Gulp build.
-exports.build = series(clear, html, scss, css, updateRedirects, fontConverter, javaScript, js, imgConverter, htmlSize, cssSize1, cssSize2, fontSize, jsSize1, jsSize2, imgSize, allSize)
+exports.build = series(clear, fontConverter, html, scss, css, javaScript, js, imgConverter, htmlSize, cssSize1, cssSize2, fontSize, jsSize1, jsSize2, imgSize, allSize)
     // Очищаем папку build, компилируем файлы и запускаем сервер stream. Gulp stream.
-exports.stream = series(clear, html, scss, css, updateRedirects, fontConverter, javaScript, js, imgConverter, htmlSize, cssSize1, cssSize2, fontSize, jsSize1, jsSize2, imgSize, allSize, stream)
+exports.stream = series(clear, fontConverter, html, scss, css, javaScript, js, imgConverter, htmlSize, cssSize1, cssSize2, fontSize, jsSize1, jsSize2, imgSize, allSize, stream)
 exports.clear = clear()
