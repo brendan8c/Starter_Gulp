@@ -83,12 +83,10 @@ function html() {
 
     return src(config.app.html)
         .pipe(include({ prefix: '@@' })) // Подключаем через @@include() файлы html к основному.
-        .pipe(posthtml(plugins))
-        .on('data', function(file) { // Это инструмент для преобразования HTML/XML с помощью плагинов JS.
+        .pipe(posthtml(plugins)) // Это инструмент для преобразования HTML/XML с помощью плагинов JS.
+        .on('data', function(file) { // HTML-минификатор на основе JavaScript.
             const buferFile = Buffer.from(htmlMinify.minify(file.contents.toString(), options))
             file.contents = buferFile;
-            console.log('file isBuffer')
-            console.log(file)
             return;
         })
         .pipe(dest(config.build.html)) // Перемещаем в папку готовой сборки.
