@@ -1,53 +1,29 @@
-const app = ('app/') // Папка с сырыми файлами
-const build = ('build/') // Папка готовой сборки
+"use strict"
+const app = ('app/') // Папка с сырыми файлами.
+const build = ('build/') // Папка готовой сборки.
+const config = require('./config.js') // Содержит пути к файлам.
 const { src, dest, series, watch } = require('gulp') // Gulp.
+const include = require('gulp-file-include') // Пакет для соединения файлов.
+const concat = require('gulp-concat') // Объединит файлы в один файл, в том порядке, в котором они указаны, в gulp.src функции.
 const browserSync = require('browser-sync').create() // Вызываем методо create чтобы сервер работал.
+const del = require('del') // Удалить файлы и каталоги.
+const size = require('gulp-size') // Регистрирует общий размер файлов в потоке и возможно отдельные размеры файлов. Размер фалов будет показан в терминале при сборке.
+const ttf2woff = require('gulp-ttf2woff') // Конвертировать шрифт из ttf в woff.
+const ttf2woff2 = require('gulp-ttf2woff2') // Конвертировать шрифт из ttf в woff2.
+const pxtorem = require('postcss-pxtorem') // Плагин который генерирует единицы rem из единиц px.
+const posthtmlPostcss = require('posthtml-postcss') // Использовать PostCSS в HTML.
+const htmlMinify = require('html-minifier') // HTML-минификатор на основе JavaScript.
 const postcss = require('gulp-postcss') // Для передачи CSS через несколько плагинов.
-const sourcemaps = require('gulp-sourcemaps') // Поддержка карты исходного кода для gulpjs. Для более удобной отладки.
 const autoprefixer = require('autoprefixer') // Добавление автопрефиксов поставщиков в правила CSS.
 const cssnano = require('cssnano') // Оптимизатор для сжатия CSS.
-const sass = require('gulp-sass') // CSS препроцессер SCSS.
-const include = require('gulp-file-include') // Пакет для соединения файлов.
-const htmlmin = require('gulp-htmlmin') // HTML-минификатор.
-const del = require('del') // Удалить файлы и каталоги.
-const concat = require('gulp-concat') // Объединит файлы в один файл, в том порядке, в котором они указаны, в gulp.src функции.
+const sass = require('gulp-sass')(require('sass')); // CSS препроцессер SCSS.
 const babel = require('gulp-babel') // Компилятор JS. Набор инструментов для преобразования кода ECMAScript 2015+ в обратно совместимую версию JS в текущих и старых браузерах.
 const babelPresetEnv = require('@babel/preset-env') // Это интеллектуальная предустановка, которая позволяет использовать последнюю версию JS без необходимости микроуправления.
-const terser = require('gulp-terser') // Инструмент для сжатия JavaScript для ES6 +. На замену старому (gulp-uglify)
-const ttf2woff = require('gulp-ttf2woff') // Конвертировать шрифт из ttf в woff
-const ttf2woff2 = require('gulp-ttf2woff2') // Конвертировать шрифт из ttf в woff2
-const size = require('gulp-size') // Регистрирует общий размер файлов в потоке и возможно отдельные размеры файлов. Размер фалов будет показан в терминале при сборке.
-    // const replace = require('replace-in-file') // Простая утилита для быстрой замены текста в одном или нескольких файлах.
-const pxtorem = require('postcss-pxtorem') // Плагин который генерирует единицы rem из единиц px.
+const terser = require('gulp-terser') // Инструмент для сжатия JavaScript для ES6 +. На замену старому (gulp-uglify).
 const posthtml = require('gulp-posthtml') // Это инструмент для преобразования HTML/XML с помощью плагинов JS.
-const posthtmlPostcss = require('posthtml-postcss') // Использовать PostCSS в HTML.
+    // const replace = require('replace-in-file') // Простая утилита для быстрой замены текста в одном или нескольких файлах.
+    // const sass = require('sass')
 
-const config = {
-    // Сырые файлы
-    app: {
-        html: app + 'html/*.html',
-        style: app + 'scss/**/*.scss',
-        js: app + 'js/**/*.*',
-        fonts: app + 'fonts/**/*.*',
-        img: app + 'img/**/*.*',
-    },
-    // Готовая сборка
-    build: {
-        html: build,
-        style: build + 'css',
-        js: build + 'js',
-        fonts: build + 'fonts',
-        img: build + 'img',
-    },
-    // Следит за обновлениями файлов внутри папок (чтобы всё работало в режиме stream)
-    watch: {
-        html: app + 'html/**/*.*',
-        style: app + 'scss/**/*.*',
-        js: app + 'js/**/*.*',
-        fonts: app + 'fonts/**/*.*',
-        img: app + 'img/**/*.*',
-    }
-}
 
 const config_size = { // Получаем размер файла.
     showFiles: false, // Отображает размер каждого файла, а не только общий размер.
@@ -64,7 +40,6 @@ const config_JS1_size = { title: '-------------------------------------------- l
 const config_JS2_size = { title: '-------------------------------------------- main.min.js: ' }
 const config_IMG_size = { title: '-------------------------------------------- IMG: ' }
 const config_ALL_size = { title: '-------------------------------------------- All project: ' }
-
 
 // Компилирует HTML файлы
 function html() {
@@ -91,29 +66,34 @@ function html() {
         // Подключаем плагины 'autoprefixer' и 'pxtorem' через плагин 'posthtml-postcss'. В опциях для PostCss выставляем значение 'undefined' для отключения ошибки.
         posthtmlPostcss(postcssPlugins, postcssOptions, filterType)
     ];
+    const options = {
+        includeAutoGeneratedTags: true, // Вставить теги, созданные парсером HTML.
+        // quoteCharacter: '', // Тип цитаты для значений атрибутов ('или ").
+        // minifyCSS: true,
+        // minifyJS: minify_es6,
+        removeAttributeQuotes: true, // По возможности удаляет кавычки вокруг атрибутов.
+        removeComments: true, // Убрать HTML-комментарии.
+        removeRedundantAttributes: true, // Удалять атрибуты, когда значение соответствует поумолчанию.
+        removeScriptTypeAttributes: true, // Удалить type="text/javascript"из scriptтегов. Остальные typeзначения атрибутов остаются без изменений.
+        removeStyleLinkTypeAttributes: true, // Удалить type="text/css"из styleи linkтеги. Остальные typeзначения атрибутов остаются без изменений.
+        sortClassName: true, // Сортировать классы стилей по частоте.
+        useShortDoctype: true, // Заменяет на doctypeкороткий (HTML5) doctype.
+        collapseWhitespace: true // Свернуть пустое пространство, которое используется в текстовых узлах в дереве документа.
+    }
+
     return src(config.app.html)
-        .pipe(include({ // Подключаем через @@include() файлы html к основному.
-            prefix: '@@'
-        }))
+        .pipe(include({ prefix: '@@' })) // Подключаем через @@include() файлы html к основному.
         .pipe(posthtml(plugins))
-        .pipe(htmlmin({ // Минифицируем HTML. (https://github.com/kangax/html-minifier#options-quick-reference)
-            collapseWhitespace: true, // Удаляем пробелы.
-            // preserveLineBreaks: true, // Всегда сворачивайте до 1 разрыва строки (никогда не удаляйте его полностью), если пробелы между тегами включают разрыв строки.
-            // conservativeCollapse: true, // Всегда сворачивайте до 1 места (никогда не удаляйте его полностью).
-            collapseInlineTagWhitespace: true, // При сворачивании не оставляйте пробелов между элементами.
-            continueOnParseError: true, // Обработка ошибок синтаксического анализа вместо прерывания.
-            html5: true, // Анализировать ввод в соответствии со спецификациями HTML5.
-            includeAutoGeneratedTags: true, // Вставить теги, созданные парсером HTML.
-            preventAttributesEscaping: true, // Предотвращает экранирование значений атрибутов.
-            removeComments: true, // Убрать HTML-комментарии.
-            removeScriptTypeAttributes: true, // Убрать type="text/javascript"из scriptтегов. Остальные typeзначения атрибутов оставлены без изменений.
-            removeStyleLinkTypeAttributes: true, // Удалить type="text/css"из styleи linkтеги. Остальные typeзначения атрибутов оставлены без изменений.
-            sortAttributes: true, // Сортировать атрибуты по частоте.
-            sortClassName: true, // Сортировать классы стилей по частоте.
-            useShortDoctype: true // Заменяет doctypedoctype на короткий (HTML5).
-        }))
+        .on('data', function(file) { // Это инструмент для преобразования HTML/XML с помощью плагинов JS.
+            const buferFile = Buffer.from(htmlMinify.minify(file.contents.toString(), options))
+            file.contents = buferFile;
+            console.log('file isBuffer')
+            console.log(file)
+            return;
+        })
         .pipe(dest(config.build.html)) // Перемещаем в папку готовой сборки.
 }
+
 
 function scss() {
     const plugins = [
@@ -136,14 +116,11 @@ function scss() {
         cssnano()
     ];
 
-    return src(config.app.style)
-        .pipe(sourcemaps.init({ loadMaps: true })) // Чтобы загрузить существующие исходные карты.
-        .pipe(sourcemaps.identityMap()) // Позволяет сгенерировать полную действительную исходную карту с кодировкой без изменений.
-        .pipe(sass()) // Скомпилировали SCSS в CSS.
+    return src(config.app.style, { sourcemaps: true }) // Значение { sourcemaps: true } позволяет сгенерировать исходные карты.
+        .pipe(sass.sync().on('error', sass.logError)) // Скомпилировали SCSS в CSS.
         .pipe(concat('style.min.css')) // Объединяем CSS файлы в один файл.
         .pipe(postcss(plugins))
-        .pipe(sourcemaps.write('../sourcemaps/'))
-        .pipe(dest(config.build.style)) // Перемещаем в папку готовой сборки.
+        .pipe(dest(config.build.style, { sourcemaps: '../sourcemaps/' })) // Перемещаем в папку готовой сборки.
 }
 
 // Заменяем все найденный строки в style.min.css.
@@ -158,16 +135,13 @@ function scss() {
 
 // Компилирует JavaScript файлы
 function javaScript() {
-    return src(config.app.js)
-        .pipe(sourcemaps.init({ loadMaps: true })) // Чтобы загрузить существующие исходные карты.
-        .pipe(sourcemaps.identityMap()) // Позволяет сгенерировать полную действительную исходную карту с кодировкой без изменений.
+    return src(config.app.js, { sourcemaps: true })
         .pipe(babel({ // Скомпилировали ECMAScript 2015+ в совместимый JS.
             presets: [babelPresetEnv]
         }))
         .pipe(terser()) // Минифицируем JS файлы.
         .pipe(concat('main.min.js')) // Объединяем CSS файлы в один файл.
-        .pipe(sourcemaps.write('../sourcemaps/'))
-        .pipe(dest(config.build.js)) // Перемещаем в папку готовой сборки.
+        .pipe(dest(config.build.js, { sourcemaps: '../sourcemaps/' }))
 
 }
 
@@ -177,7 +151,7 @@ function fontConverter() {
         .pipe(ttf2woff()) // Конвертирует шрифт ttf в woff
         .pipe(src(config.app.fonts))
         .pipe(ttf2woff2()) // Конвертирует шрифт ttf в woff2
-        .pipe(dest(config.build.fonts)) // Перемещаем в папку готовой сборки.
+        .pipe(dest(config.build.fonts))
 }
 
 // Клонируем изображения
@@ -198,30 +172,20 @@ function css() {
         }),
         cssnano()
     ];
-    return src([
-            'node_modules/normalize.css/normalize.css',
-        ])
-        .pipe(sourcemaps.init({ loadMaps: true }))
-        .pipe(sourcemaps.identityMap())
+    return src(['node_modules/normalize.css/normalize.css'], { sourcemaps: true })
         .pipe(postcss(plugins))
         .pipe(concat('libs.min.css'))
-        .pipe(sourcemaps.write('../sourcemaps/'))
-        .pipe(dest(config.build.style))
+        .pipe(dest(config.build.style, { sourcemaps: '../sourcemaps/' }))
 }
 //—————————————————————— Подключаем JS файлы и минифицируем их в libs.min.js ——————————————————————
 function js() {
-    return src([
-            'node_modules/jquery/dist/jquery.js',
-        ])
-        .pipe(sourcemaps.init({ loadMaps: true }))
-        .pipe(sourcemaps.identityMap())
+    return src(['node_modules/jquery/dist/jquery.js'], { sourcemaps: true })
         .pipe(babel({
             presets: [babelPresetEnv]
         }))
         .pipe(terser())
         .pipe(concat('libs.min.js'))
-        .pipe(sourcemaps.write('../sourcemaps/'))
-        .pipe(dest(config.build.js))
+        .pipe(dest(config.build.js, { sourcemaps: '../sourcemaps/' }))
 }
 
 // Получаем размеры файлов в готовой сборке 
@@ -284,7 +248,7 @@ function stream() {
         // Следит за обновлениями html, scss и п.р. файлов. Если произошли изменения тогда вызываем задачу series(). И перезагружаем сервер.
     watch(config.watch.html, series(html)).on('change', browserSync.reload)
     watch(config.watch.style, series(scss)).on('change', browserSync.reload)
-    watch(config.watch.style, series(css)).on('change', browserSync.reload)
+        // watch(config.watch.style, series(css)).on('change', browserSync.reload)
     watch(config.watch.js, series(javaScript)).on('change', browserSync.reload)
     watch(config.watch.js, series(js)).on('change', browserSync.reload)
     watch(config.watch.fonts, series(fontConverter)).on('change', browserSync.reload)
@@ -292,6 +256,7 @@ function stream() {
 }
 
 // Экспортируем задачи для сборки проекта или запуска в режиме разработки.
+// series - Объединяет функции задач и составные операции в более крупные операции, которые будут выполняться одна за другой в последовательном порядке.
 // Вызываем по очерёдно задачи. Gulp build.
 exports.build = series(clear, fontConverter, html, scss, css, javaScript, js, imgConverter, htmlSize, cssSize1, cssSize2, fontSize, jsSize1, jsSize2, imgSize, allSize)
     // Очищаем папку build, компилируем файлы и запускаем сервер stream. Gulp stream.
