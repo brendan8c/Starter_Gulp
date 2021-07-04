@@ -15,7 +15,7 @@ const posthtmlPostcss = require('posthtml-postcss') // Использовать 
 const htmlMinify = require('html-minifier') // HTML-минификатор на основе JavaScript.
 const postcss = require('gulp-postcss') // Для передачи CSS через несколько плагинов.
 const autoprefixer = require('autoprefixer') // Добавление автопрефиксов поставщиков в правила CSS.
-const cssnano = require('cssnano') // Оптимизатор для сжатия CSS.
+const CleanCSS = require('clean-css'); // Это быстрый и эффективный оптимизатор CSS он минифицирет файл.
 const sass = require('gulp-sass')(require('sass')); // CSS препроцессер SCSS.
 const babel = require('gulp-babel') // Компилятор JS. Набор инструментов для преобразования кода ECMAScript 2015+ в обратно совместимую версию JS в текущих и старых браузерах.
 const babelPresetEnv = require('@babel/preset-env') // Это интеллектуальная предустановка, которая позволяет использовать последнюю версию JS без необходимости микроуправления.
@@ -94,6 +94,11 @@ function html() {
 
 
 function scss() {
+    const options = {
+        compatibility: '*', // (по умолчанию) - режим совместимости с Internet Explorer 10+
+        inline: ['all'], // включает все встраивание, так же как ['local', 'remote']
+        level: 2 // Уровни оптимизации. Опция может быть 0, 1( по умолчанию), или 2, например
+    };
     const plugins = [
         autoprefixer({
             // browsers: 'last 1 version'
@@ -110,14 +115,17 @@ function scss() {
             replace: false, // Заменяет правила, содержащие rems, вместо добавления резервных вариантов.
             mediaQuery: false, // Разрешить преобразование px в медиа-запросах.
             minPixelValue: 0, // Установите минимальное значение заменяемого пикселя.
-        }),
-        cssnano()
+        })
     ];
 
     return src(config.app.style, { sourcemaps: true }) // Значение { sourcemaps: true } позволяет сгенерировать исходные карты.
         .pipe(sass.sync().on('error', sass.logError)) // Скомпилировали SCSS в CSS.
         .pipe(concat('style.min.css')) // Объединяем CSS файлы в один файл.
         .pipe(postcss(plugins))
+        .on('data', function(file) { // Это быстрый и эффективный оптимизатор CSS.
+            const buferFile = new CleanCSS(options).minify(file.contents)
+            return file.contents = Buffer.from(buferFile.styles)
+        })
         .pipe(dest(config.build.style, { sourcemaps: '../sourcemaps/' })) // Перемещаем в папку готовой сборки.
 }
 
@@ -167,12 +175,15 @@ function css() {
                 'not ie 11',
                 'not op_mini all'
             ]
-        }),
-        cssnano()
+        })
     ];
     return src(['node_modules/normalize.css/normalize.css'], { sourcemaps: true })
         .pipe(postcss(plugins))
         .pipe(concat('libs.min.css'))
+        .on('data', function(file) {
+            const buferFile = new CleanCSS(options).minify(file.contents)
+            return file.contents = Buffer.from(buferFile.styles)
+        })
         .pipe(dest(config.build.style, { sourcemaps: '../sourcemaps/' }))
 }
 //—————————————————————— Подключаем JS файлы и минифицируем их в libs.min.js ——————————————————————
