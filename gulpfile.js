@@ -24,6 +24,11 @@ const posthtml = require('gulp-posthtml') // Это инструмент для 
     // const replace = require('replace-in-file') // Простая утилита для быстрой замены текста в одном или нескольких файлах.
     // const sass = require('sass')
 
+const optionsCleanCSS = {
+    compatibility: '*', // (по умолчанию) - режим совместимости с Internet Explorer 10+
+    inline: ['all'], // включает все встраивание, так же как ['local', 'remote']
+    level: 2 // Уровни оптимизации. Опция может быть 0, 1( по умолчанию), или 2, например
+};
 
 const config_size = { // Получаем размер файла.
     showFiles: false, // Отображает размер каждого файла, а не только общий размер.
@@ -86,19 +91,13 @@ function html() {
         .pipe(posthtml(plugins)) // Это инструмент для преобразования HTML/XML с помощью плагинов JS.
         .on('data', function(file) { // HTML-минификатор на основе JavaScript.
             const buferFile = Buffer.from(htmlMinify.minify(file.contents.toString(), options))
-            file.contents = buferFile;
-            return;
+            return file.contents = buferFile
         })
         .pipe(dest(config.build.html)) // Перемещаем в папку готовой сборки.
 }
 
 
 function scss() {
-    const options = {
-        compatibility: '*', // (по умолчанию) - режим совместимости с Internet Explorer 10+
-        inline: ['all'], // включает все встраивание, так же как ['local', 'remote']
-        level: 2 // Уровни оптимизации. Опция может быть 0, 1( по умолчанию), или 2, например
-    };
     const plugins = [
         autoprefixer({
             // browsers: 'last 1 version'
@@ -123,7 +122,7 @@ function scss() {
         .pipe(concat('style.min.css')) // Объединяем CSS файлы в один файл.
         .pipe(postcss(plugins))
         .on('data', function(file) { // Это быстрый и эффективный оптимизатор CSS.
-            const buferFile = new CleanCSS(options).minify(file.contents)
+            const buferFile = new CleanCSS(optionsCleanCSS).minify(file.contents)
             return file.contents = Buffer.from(buferFile.styles)
         })
         .pipe(dest(config.build.style, { sourcemaps: '../sourcemaps/' })) // Перемещаем в папку готовой сборки.
@@ -181,7 +180,7 @@ function css() {
         .pipe(postcss(plugins))
         .pipe(concat('libs.min.css'))
         .on('data', function(file) {
-            const buferFile = new CleanCSS(options).minify(file.contents)
+            const buferFile = new CleanCSS(optionsCleanCSS).minify(file.contents)
             return file.contents = Buffer.from(buferFile.styles)
         })
         .pipe(dest(config.build.style, { sourcemaps: '../sourcemaps/' }))
