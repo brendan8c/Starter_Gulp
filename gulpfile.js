@@ -19,7 +19,7 @@ const CleanCSS = require('clean-css'); // Это быстрый и эффект�
 const sass = require('gulp-sass')(require('sass')); // CSS препроцессер SCSS.
 const babel = require('gulp-babel') // Компилятор JS. Набор инструментов для преобразования кода ECMAScript 2015+ в обратно совместимую версию JS в текущих и старых браузерах.
 const babelPresetEnv = require('@babel/preset-env') // Это интеллектуальная предустановка, которая позволяет использовать последнюю версию JS без необходимости микроуправления.
-const terser = require('gulp-terser') // Инструмент для сжатия JavaScript для ES6 +. На замену старому (gulp-uglify).
+const { minify } = require('terser'); // Набор инструментов для синтаксического анализа и преобразования / сжатия JavaScript для ES6 +.
 const posthtml = require('gulp-posthtml') // Это инструмент для преобразования HTML/XML с помощью плагинов JS.
     // const replace = require('replace-in-file') // Простая утилита для быстрой замены текста в одном или нескольких файлах.
     // const sass = require('sass')
@@ -28,6 +28,14 @@ const optionsCleanCSS = {
     compatibility: '*', // (по умолчанию) - режим совместимости с Internet Explorer 10+
     inline: ['all'], // включает все встраивание, так же как ['local', 'remote']
     level: 2 // Уровни оптимизации. Опция может быть 0, 1( по умолчанию), или 2, например
+};
+
+const optionsTerser = {
+    parse: {
+        bare_returns: true,
+        html5_comments: true,
+        shebang: true
+    }
 };
 
 const config_size = { // Получаем размер файла.
@@ -144,7 +152,15 @@ function javaScript() {
         .pipe(babel({ // Скомпилировали ECMAScript 2015+ в совместимый JS.
             presets: [babelPresetEnv]
         }))
-        .pipe(terser()) // Минифицируем JS файлы.
+        .on('data', function(file) { // Минифицируем JS файлы.
+            async function getJs() {
+                const result = await minify(file.contents.toString(), optionsTerser);
+                return await minify(result)
+            }
+            (async function() {
+                file.contents = Buffer.from(JSON.parse(Buffer.from(JSON.stringify(await getJs()))).code)
+            })();
+        })
         .pipe(concat('main.min.js')) // Объединяем CSS файлы в один файл.
         .pipe(dest(config.build.js, { sourcemaps: '../sourcemaps/' }))
 
@@ -191,7 +207,15 @@ function js() {
         .pipe(babel({
             presets: [babelPresetEnv]
         }))
-        .pipe(terser())
+        .on('data', function(file) {
+            async function getJs() {
+                const result = await minify(file.contents.toString(), optionsTerser);
+                return await minify(result)
+            }
+            (async function() {
+                file.contents = Buffer.from(JSON.parse(Buffer.from(JSON.stringify(await getJs()))).code)
+            })();
+        })
         .pipe(concat('libs.min.js'))
         .pipe(dest(config.build.js, { sourcemaps: '../sourcemaps/' }))
 }

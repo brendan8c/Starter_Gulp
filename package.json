@@ -31,14 +31,14 @@
         "gulp-posthtml": "^3.0.5",
         "gulp-sass": "^5.0.0",
         "gulp-size": "^4.0.1",
-        "gulp-terser": "^2.0.1",
         "gulp-ttf2woff": "^1.1.1",
         "gulp-ttf2woff2": "^4.0.1",
         "html-minifier": "^4.0.0",
         "postcss-pxtorem": "^6.0.0",
         "posthtml-postcss": "^0.5.0",
         "replace-in-file": "^6.2.0",
-        "sass": "^1.35.1"
+        "sass": "^1.35.1",
+        "terser": "^5.4.0"
     },
     "dependencies": {
         "jquery": "^3.6.0",
