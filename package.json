@@ -12,22 +12,25 @@
     },
     "author": "Brendan8c",
     "license": "MIT",
+    "type": "module",
     "bugs": {
         "url": "https://github.com/brendan8c/start_gulp/issues"
     },
     "homepage": "https://github.com/brendan8c/start_gulp#readme",
     "devDependencies": {
-        "@babel/core": "^7.14.6",
-        "@babel/preset-env": "^7.14.7",
-        "autoprefixer": "^10.2.6",
-        "browser-sync": "^2.27.4",
-        "clean-css": "^4.2.3",
+        "@babel/core": "^7.15.5",
+        "@babel/preset-env": "^7.15.4",
+        "autoprefixer": "^10.3.4",
+        "browser-sync": "^2.27.5",
+        "clean-css": "^5.1.5",
         "del": "^6.0.0",
+        "fs": "^0.0.1-security",
+        "glob": "^7.1.7",
         "gulp": "^4.0.2",
         "gulp-babel": "^8.0.0",
         "gulp-concat": "^2.6.1",
         "gulp-file-include": "^2.3.0",
-        "gulp-postcss": "^9.0.0",
+        "gulp-postcss": "^9.0.1",
         "gulp-posthtml": "^3.0.5",
         "gulp-sass": "^5.0.0",
         "gulp-size": "^4.0.1",
@@ -37,8 +40,8 @@
         "postcss-pxtorem": "^6.0.0",
         "posthtml-postcss": "^0.5.0",
         "replace-in-file": "^6.2.0",
-        "sass": "^1.35.1",
-        "terser": "^5.4.0"
+        "sass": "^1.39.0",
+        "terser": "^5.7.2"
     },
     "dependencies": {
         "jquery": "^3.6.0",

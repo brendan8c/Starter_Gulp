@@ -1,4 +1,4 @@
-module.exports = {
+export default Object.config = {
     // Сырые файлы
     app: {
         html: 'app/html/*.html',
