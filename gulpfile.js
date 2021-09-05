@@ -262,5 +262,5 @@ function stream() {
 // Экспортируем задачи для сборки проекта или запуска в режиме разработки.
 async function builds() { await clear(), await fontConverter(), await html(), scss(), css(), javaScript(), js(), imgConverter() }
 export { builds }
-async function start() { await clear(), await fontConverter(), await html(), scss(), css(), javaScript(), js(), imgConverter(), stream() }
-export { start }
+async function streams() { await clear(), await fontConverter(), await html(), scss(), css(), javaScript(), js(), imgConverter(), stream() }
+export { streams }
