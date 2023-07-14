@@ -102,6 +102,16 @@ section {
     display: block;
 }
 
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    overflow-wrap: break-word;
+}
+
 html {
     box-sizing: border-box;
     transition: font-size 0.4s ease-out;
@@ -110,9 +120,19 @@ html {
 body {
     overflow-x: hidden;
     min-height: 100vh;
-    line-height: 1;
+    line-height: 1.5;
     text-rendering: optimizeSpeed;
     scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+}
+
+html,
+body {
+    height: 100%;
+}
+
+* {
+    margin: 0;
 }
 
 *,
@@ -144,7 +164,7 @@ blockquote:before,
 blockquote:after,
 q:before,
 q:after {
-    content: '';
+    content: "";
     content: none;
 }
 
@@ -153,10 +173,15 @@ table {
     border-spacing: 0;
 }
 
-// img {
-//     max-width: 100%;
-//     display: block;
-// }
+img,
+picture,
+video,
+canvas,
+svg {
+    display: block;
+    max-width: 100%;
+}
+
 article>*+* {
     margin-top: 1em;
 }
@@ -166,6 +191,11 @@ button,
 textarea,
 select {
     font: inherit;
+}
+
+#root,
+#__next {
+    isolation: isolate;
 }
 
 .container {

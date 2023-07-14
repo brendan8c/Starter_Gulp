@@ -18,33 +18,34 @@
     },
     "homepage": "https://github.com/brendan8c/start_gulp#readme",
     "devDependencies": {
-        "@babel/core": "^7.15.5",
-        "@babel/preset-env": "^7.15.4",
-        "autoprefixer": "^10.3.4",
-        "browser-sync": "^2.27.5",
-        "clean-css": "^5.1.5",
-        "del": "^6.0.0",
+        "@babel/core": "^7.22.9",
+        "@babel/preset-env": "^7.22.9",
+        "autoprefixer": "^10.4.14",
+        "browser-sync": "^2.29.3",
+        "clean-css": "^5.3.2",
+        "del": "^7.0.0",
         "fs": "^0.0.1-security",
-        "glob": "^7.1.7",
+        "glob": "^10.3.3",
         "gulp": "^4.0.2",
         "gulp-babel": "^8.0.0",
         "gulp-concat": "^2.6.1",
         "gulp-file-include": "^2.3.0",
         "gulp-postcss": "^9.0.1",
         "gulp-posthtml": "^3.0.5",
-        "gulp-sass": "^5.0.0",
+        "gulp-sass": "^5.1.0",
         "gulp-size": "^4.0.1",
         "gulp-ttf2woff": "^1.1.1",
         "gulp-ttf2woff2": "^4.0.1",
         "html-minifier": "^4.0.0",
         "postcss-pxtorem": "^6.0.0",
         "posthtml-postcss": "^0.5.0",
-        "replace-in-file": "^6.2.0",
-        "sass": "^1.39.0",
-        "terser": "^5.7.2"
+        "replace-in-file": "^7.0.1",
+        "terser": "^5.19.0",
+        "through2": "^4.0.2"
     },
     "dependencies": {
-        "jquery": "^3.6.0",
-        "normalize.css": "^8.0.1"
+        "jquery": "^3.7.0",
+        "normalize.css": "^8.0.1",
+        "sass": "^1.63.6"
     }
 }

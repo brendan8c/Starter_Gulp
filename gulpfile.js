@@ -1,148 +1,142 @@
-"use strict"
-import fs from 'fs' // Модуль fs позволяет взаимодействовать с файловой системой.
-import glob from 'glob' // Сопоставление файлов с использованием шаблонов.
-const build = 'build/' // Папка готовой сборки.
-import config from './config.js' // Содержит пути к файлам.
+'use strict';
+// import fs from 'fs'; // Модуль fs позволяет взаимодействовать с файловой системой.
+// import path from 'path';
+// import glob from 'glob'; // Сопоставление файлов с использованием шаблонов.
+// import through2 from 'through2'; //
+const build = 'build/'; // Папка готовой сборки.
+import config from './config.js'; // Содержит пути к файлам.
 import pkg from 'gulp';
 const { src, dest, series, watch } = pkg; // Gulp.
-import include from 'gulp-file-include' // Пакет для соединения файлов.
-import concat from 'gulp-concat' // Объединит файлы в один файл, в том порядке, в котором они указаны, в gulp.src функции.
-import BrowserSyncF from 'browser-sync' // Вызываем методо create чтобы сервер работал.
+import include from 'gulp-file-include'; // Пакет для соединения файлов.
+import concat from 'gulp-concat'; // Объединит файлы в один файл, в том порядке, в котором они указаны, в gulp.src функции.
+import BrowserSyncF from 'browser-sync'; // Вызываем методо create чтобы сервер работал.
 const browserSync = BrowserSyncF.create();
-import del from 'del' // Удалить файлы и каталоги.
-import size from 'gulp-size' // Регистрирует общий размер файлов в потоке и возможно отдельные размеры файлов. Размер фалов будет показан в терминале при сборке.
-import ttf2woff from 'gulp-ttf2woff' // Конвертировать шрифт из ttf в woff.
-import ttf2woff2 from 'gulp-ttf2woff2' // Конвертировать шрифт из ttf в woff2.
-import pxtorem from 'postcss-pxtorem' // Плагин который генерирует единицы rem из единиц px.
-import posthtmlPostcss from 'posthtml-postcss' // Использовать PostCSS в HTML.
-import htmlMinify from 'html-minifier' // HTML-минификатор на основе JavaScript.
-import postcss from 'gulp-postcss' // Для передачи CSS через несколько плагинов.
-import autoprefixer from 'autoprefixer' // Добавление автопрефиксов поставщиков в правила CSS.
-import CleanCSS from 'clean-css' // Это быстрый и эффективный оптимизатор CSS он минифицирет файл.
+import { deleteAsync } from 'del'; // Удалить файлы и каталоги.
+import size from 'gulp-size'; // Регистрирует общий размер файлов в потоке и возможно отдельные размеры файлов. Размер фалов будет показан в терминале при сборке.
+import ttf2woff from 'gulp-ttf2woff'; // Конвертировать шрифт из ttf в woff.
+import ttf2woff2 from 'gulp-ttf2woff2'; // Конвертировать шрифт из ttf в woff2.
+import pxtorem from 'postcss-pxtorem'; // Плагин который генерирует единицы rem из единиц px.
+import posthtmlPostcss from 'posthtml-postcss'; // Использовать PostCSS в HTML.
+import htmlMinify from 'html-minifier'; // HTML-минификатор на основе JavaScript.
+import postcss from 'gulp-postcss'; // Для передачи CSS через несколько плагинов.
+import autoprefixer from 'autoprefixer'; // Добавление автопрефиксов поставщиков в правила CSS.
+import CleanCSS from 'clean-css'; // Это быстрый и эффективный оптимизатор CSS он минифицирет файл.
 
-import dartSass from 'sass' // CSS препроцессер SCSS.
-import gulpSass from 'gulp-sass' // CSS препроцессер SCSS.
-const sass = gulpSass(dartSass)
+import sass from 'sass'; // CSS препроцессер SCSS.
+import gulpSass from 'gulp-sass'; // CSS препроцессер SCSS.
+const scsss = gulpSass(sass); // CSS препроцессер SCSS.
 
-import babel from 'gulp-babel' // Компилятор JS. Набор инструментов для преобразования кода ECMAScript 2015+ в обратно совместимую версию JS в текущих и старых браузерах.
-import babelPresetEnv from '@babel/preset-env' // Это интеллектуальная предустановка, которая позволяет использовать последнюю версию JS без необходимости микроуправления.
-import { minify } from 'terser' // Набор инструментов для синтаксического анализа и преобразования / сжатия JavaScript для ES6 +.
-import posthtml from 'gulp-posthtml' // Это инструмент для преобразования HTML/XML с помощью плагинов JS.
+import babel from 'gulp-babel'; // Компилятор JS. Набор инструментов для преобразования кода ECMAScript 2015+ в обратно совместимую версию JS в текущих и старых браузерах.
+import babelPresetEnv from '@babel/preset-env'; // Это интеллектуальная предустановка, которая позволяет использовать последнюю версию JS без необходимости микроуправления.
+import { minify } from 'terser'; // Набор инструментов для синтаксического анализа и преобразования / сжатия JavaScript для ES6 +.
+import posthtml from 'gulp-posthtml'; // Это инструмент для преобразования HTML/XML с помощью плагинов JS.
 // const replace = require('replace-in-file') // Простая утилита для быстрой замены текста в одном или нескольких файлах.
-const log = console.log;
 const optionsCleanCSS = {
-    compatibility: '*', // (по умолчанию) - режим совместимости с Internet Explorer 10+
-    inline: ['all'], // включает все встраивание, так же как ['local', 'remote']
-    level: 2 // Уровни оптимизации. Опция может быть 0, 1( по умолчанию), или 2, например
+  compatibility: '*', // (по умолчанию) - режим совместимости с Internet Explorer 10+
+  inline: ['all'], // включает все встраивание, так же как ['local', 'remote']
+  level: 2, // Уровни оптимизации. Опция может быть 0, 1( по умолчанию), или 2, например
 };
 
 const optionsTerser = {
-    parse: {
-        bare_returns: true,
-        html5_comments: true,
-        shebang: true
-    }
+  parse: {
+    bare_returns: true,
+    html5_comments: true,
+    shebang: true,
+  },
 };
 
-const config_size = { // Получаем размер файла.
-    showFiles: false, // Отображает размер каждого файла, а не только общий размер.
-    showTotal: true, // Отображает общее количество всех файлов.
-    pretty: true, // Отображает предварительно заданный размер: 1337 Б → 1,34 КБ.я
-    gzip: false, // Отображает размер в сжатом виде.
-}
+const config_size = {
+  // Получаем размер файла.
+  showFiles: false, // Отображает размер каждого файла, а не только общий размер.
+  showTotal: true, // Отображает общее количество всех файлов.
+  pretty: true, // Отображает предварительно заданный размер: 1337 Б → 1,34 КБ.я
+  gzip: false, // Отображает размер в сжатом виде.
+};
 
-const config_HTML_size = { title: '-------------------------------------------- HTML: ' }
-const config_CSS1_size = { title: '-------------------------------------------- libs.min.css: ' }
-const config_CSS2_size = { title: '-------------------------------------------- style.min.css: ' }
-const config_FONTS_size = { title: '-------------------------------------------- FONTS: ' }
-const config_JS1_size = { title: '-------------------------------------------- libs.min.js: ' }
-const config_JS2_size = { title: '-------------------------------------------- main.min.js: ' }
-const config_IMG_size = { title: '-------------------------------------------- IMG: ' }
-const config_ALL_size = { title: '-------------------------------------------- All project: ' }
-
+const config_HTML_size = { title: '-------------------------------------------- HTML: ' };
+const config_CSS1_size = { title: '-------------------------------------------- libs.min.css: ' };
+const config_CSS2_size = { title: '-------------------------------------------- style.min.css: ' };
+const config_FONTS_size = { title: '-------------------------------------------- FONTS: ' };
+const config_JS1_size = { title: '-------------------------------------------- libs.min.js: ' };
+const config_JS2_size = { title: '-------------------------------------------- main.min.js: ' };
+const config_IMG_size = { title: '-------------------------------------------- IMG: ' };
 
 // Компилирует HTML файлы
 function html() {
-    const postcssPlugins = [
-        autoprefixer({
-            overrideBrowserslist: [
-                '>0.25%',
-                'not ie 11',
-                'not op_mini all'
-            ]
-        }),
-        pxtorem({
-            rootValue: 16,
-            unitPrecision: 5,
-            propList: ['font', 'font-size', 'line-height', 'letter-spacing'],
-            replace: false,
-            mediaQuery: false,
-            minPixelValue: 0,
-        })
-    ];
-    const postcssOptions = { from: undefined }
-    const filterType = /^text\/css$/
-    const plugins = [
-        // Подключаем плагины 'autoprefixer' и 'pxtorem' через плагин 'posthtml-postcss'. В опциях для PostCss выставляем значение 'undefined' для отключения ошибки.
-        posthtmlPostcss(postcssPlugins, postcssOptions, filterType)
-    ];
-    const options = {
-        includeAutoGeneratedTags: true, // Вставить теги, созданные парсером HTML.
-        // quoteCharacter: '', // Тип цитаты для значений атрибутов ('или ").
-        // minifyCSS: true,
-        // minifyJS: minify_es6,
-        removeAttributeQuotes: true, // По возможности удаляет кавычки вокруг атрибутов.
-        removeComments: true, // Убрать HTML-комментарии.
-        removeRedundantAttributes: true, // Удалять атрибуты, когда значение соответствует поумолчанию.
-        removeScriptTypeAttributes: true, // Удалить type="text/javascript"из scriptтегов. Остальные typeзначения атрибутов остаются без изменений.
-        removeStyleLinkTypeAttributes: true, // Удалить type="text/css"из styleи linkтеги. Остальные typeзначения атрибутов остаются без изменений.
-        sortClassName: true, // Сортировать классы стилей по частоте.
-        useShortDoctype: true, // Заменяет на doctypeкороткий (HTML5) doctype.
-        collapseWhitespace: true // Свернуть пустое пространство, которое используется в текстовых узлах в дереве документа.
-    }
+  const postcssPlugins = [
+    autoprefixer({
+      overrideBrowserslist: ['>0.25%', 'not ie 11', 'not op_mini all'],
+    }),
+    pxtorem({
+      rootValue: 16,
+      unitPrecision: 5,
+      propList: ['font', 'font-size', 'line-height', 'letter-spacing'],
+      replace: false,
+      mediaQuery: false,
+      minPixelValue: 0,
+    }),
+  ];
+  const postcssOptions = { from: undefined };
+  const filterType = /^text\/css$/;
+  const plugins = [
+    // Подключаем плагины 'autoprefixer' и 'pxtorem' через плагин 'posthtml-postcss'. В опциях для PostCss выставляем значение 'undefined' для отключения ошибки.
+    posthtmlPostcss(postcssPlugins, postcssOptions, filterType),
+  ];
+  const options = {
+    includeAutoGeneratedTags: true, // Вставить теги, созданные парсером HTML.
+    // quoteCharacter: '', // Тип цитаты для значений атрибутов ('или ").
+    // minifyCSS: true,
+    // minifyJS: minify_es6,
+    removeAttributeQuotes: true, // По возможности удаляет кавычки вокруг атрибутов.
+    removeComments: true, // Убрать HTML-комментарии.
+    removeRedundantAttributes: true, // Удалять атрибуты, когда значение соответствует поумолчанию.
+    removeScriptTypeAttributes: true, // Удалить type="text/javascript"из scriptтегов. Остальные typeзначения атрибутов остаются без изменений.
+    removeStyleLinkTypeAttributes: true, // Удалить type="text/css"из styleи linkтеги. Остальные typeзначения атрибутов остаются без изменений.
+    sortClassName: true, // Сортировать классы стилей по частоте.
+    useShortDoctype: true, // Заменяет на doctypeкороткий (HTML5) doctype.
+    collapseWhitespace: true, // Свернуть пустое пространство, которое используется в текстовых узлах в дереве документа.
+  };
 
-    return src(config.app.html)
-        .pipe(include({ prefix: '@@' })) // Подключаем через @@include() файлы html к основному.
-        .pipe(posthtml(plugins)) // Это инструмент для преобразования HTML/XML с помощью плагинов JS.
-        .on('data', function(file) { // HTML-минификатор на основе JavaScript.
-            const buferFile = Buffer.from(htmlMinify.minify(file.contents.toString(), options))
-            return file.contents = buferFile
-        })
-        .pipe(size(Object.assign(config_size, config_HTML_size))) // Получаем размеры файлов в готовой сборке.
-        .pipe(dest(config.build.html)) // Перемещаем в папку готовой сборки.
+  return src(config.app.html)
+    .pipe(include({ prefix: '@@' })) // Подключаем через @@include() файлы html к основному.
+    .pipe(posthtml(plugins)) // Это инструмент для преобразования HTML/XML с помощью плагинов JS.
+    .on('data', file => {
+      // HTML-минификатор на основе JavaScript.
+      const buferFile = Buffer.from(htmlMinify.minify(file.contents.toString(), options));
+      return (file.contents = buferFile);
+    })
+    .pipe(size(Object.assign(config_size, config_HTML_size))) // Получаем размеры файлов в готовой сборке.
+    .pipe(dest(config.build.html)); // Перемещаем в папку готовой сборки.
 }
 
-
+// Компилирует scss файлы
 function scss() {
-    const plugins = [
-        autoprefixer({
-            // browsers: 'last 1 version'
-            overrideBrowserslist: [
-                '>0.25%',
-                'not ie 11',
-                'not op_mini all'
-            ]
-        }),
-        pxtorem({
-            rootValue: 16, // Представляет размер шрифта корневого элемента.
-            unitPrecision: 5, // Десятичные числа, до которых могут вырасти единицы REM.
-            propList: ['font', 'font-size', 'line-height', 'letter-spacing'], // Свойства, которые могут изменяться с px на rem.
-            replace: false, // Заменяет правила, содержащие rems, вместо добавления резервных вариантов.
-            mediaQuery: false, // Разрешить преобразование px в медиа-запросах.
-            minPixelValue: 0, // Установите минимальное значение заменяемого пикселя.
-        })
-    ];
+  const plugins = [
+    autoprefixer({
+      // browsers: 'last 1 version'
+      overrideBrowserslist: ['>0.25%', 'not ie 11', 'not op_mini all'],
+    }),
+    pxtorem({
+      rootValue: 16, // Представляет размер шрифта корневого элемента.
+      unitPrecision: 5, // Десятичные числа, до которых могут вырасти единицы REM.
+      propList: ['font', 'font-size', 'line-height', 'letter-spacing'], // Свойства, которые могут изменяться с px на rem.
+      replace: false, // Заменяет правила, содержащие rems, вместо добавления резервных вариантов.
+      mediaQuery: false, // Разрешить преобразование px в медиа-запросах.
+      minPixelValue: 0, // Установите минимальное значение заменяемого пикселя.
+    }),
+  ];
 
-    return src(config.app.style, { sourcemaps: true }) // Значение { sourcemaps: true } позволяет сгенерировать исходные карты. // -------------------------- Path to scss files
-        .pipe(sass.sync().on('error', sass.logError)) // Скомпилировали SCSS в CSS.
-        .pipe(concat('style.min.css')) // Объединяем CSS файлы в один файл.
-        .pipe(postcss(plugins))
-        .on('data', function(file) { // Это быстрый и эффективный оптимизатор CSS.
-            const buferFile = new CleanCSS(optionsCleanCSS).minify(file.contents)
-            return file.contents = Buffer.from(buferFile.styles)
-        })
-        .pipe(size(Object.assign(config_size, config_CSS2_size))) // Получаем размеры файлов в готовой сборке.
-        .pipe(dest(config.build.style, { sourcemaps: '../sourcemaps/' })) // Перемещаем в папку готовой сборки.
+  return src(config.app.style, { sourcemaps: true }) // Значение { sourcemaps: true } позволяет сгенерировать исходные карты. // -------------------------- Path to scss files
+    .pipe(scsss().on('error', scsss.logError)) // Скомпилировали SCSS в CSS.
+    .pipe(concat('style.min.css')) // Объединяем CSS файлы в один файл.
+    .pipe(postcss(plugins))
+    .on('data', file => {
+      // Это быстрый и эффективный оптимизатор CSS.
+      const buferFile = new CleanCSS(optionsCleanCSS).minify(file.contents);
+      return (file.contents = Buffer.from(buferFile.styles));
+    })
+    .pipe(size(Object.assign(config_size, config_CSS2_size))) // Получаем размеры файлов в готовой сборке.
+    .pipe(dest(config.build.style, { sourcemaps: '../sourcemaps/' })); // Перемещаем в папку готовой сборки.
 }
 
 // Заменяем все найденный строки в style.min.css.
@@ -157,110 +151,152 @@ function scss() {
 
 // Компилирует JavaScript файлы
 function javaScript() {
-    return src(config.app.js, { sourcemaps: true })
-        .pipe(babel({ // Скомпилировали ECMAScript 2015+ в совместимый JS.
-            presets: [babelPresetEnv]
-        }))
-        .pipe(concat('main.min.js')) // Объединяем JS файлы в один файл.
-        .on('data', function(file) { // Минифицируем JS файлы.
-            async function getJs() {
-                const result = await minify(file.contents.toString(), optionsTerser);
-                return await minify(result)
-            }
-            (async function() {
-                file.contents = Buffer.from(JSON.parse(Buffer.from(JSON.stringify(await getJs()))).code)
-            })();
-        })
-        .pipe(size(Object.assign(config_size, config_JS2_size)))
-        .pipe(dest(config.build.js, { sourcemaps: '../sourcemaps/' }))
+  return src(config.app.js, { sourcemaps: true })
+    .pipe(
+      babel({
+        // Скомпилировали ECMAScript 2015+ в совместимый JS.
+        presets: [babelPresetEnv],
+      })
+    )
+    .pipe(concat('main.min.js')) // Объединяем JS файлы в один файл.
+    .on('data', function (file) {
+      // Минифицируем JS файлы.
+      async function getJs() {
+        const result = await minify(file.contents.toString(), optionsTerser);
+        return await minify(result);
+      }
+      (async function () {
+        file.contents = Buffer.from(JSON.parse(Buffer.from(JSON.stringify(await getJs()))).code);
+      })();
+    })
+    .pipe(size(Object.assign(config_size, config_JS2_size)))
+    .pipe(dest(config.build.js, { sourcemaps: '../sourcemaps/' }));
 }
 
 // Конвертирует шрифт
 function fontConverter() {
-    return src(config.app.fonts)
-        .pipe(ttf2woff()) // Конвертирует шрифт ttf в woff
-        .pipe(src(config.app.fonts))
-        .pipe(ttf2woff2()) // Конвертирует шрифт ttf в woff2
-        .pipe(size(Object.assign(config_size, config_FONTS_size)))
-        .pipe(dest(config.build.fonts))
+  return src(config.app.fonts)
+    .pipe(ttf2woff()) // Конвертирует шрифт ttf в woff
+    .pipe(src(config.app.fonts))
+    .pipe(ttf2woff2()) // Конвертирует шрифт ttf в woff2
+    .pipe(size(Object.assign(config_size, config_FONTS_size)))
+    .pipe(dest(config.build.fonts));
 }
 
 // Клонируем изображения
 function imgConverter() {
-    return src(config.app.img)
-        .pipe(size(Object.assign(config_size, config_IMG_size)))
-        .pipe(dest(config.build.img))
+  return src(config.app.img)
+    .pipe(size(Object.assign(config_size, config_IMG_size)))
+    .pipe(dest(config.build.img));
 }
 
 //—————————————————————— Подключаем CSS файлы и минифицируем их в libs.min.css ——————————————————————
 function css() {
-    const plugins = [
-        autoprefixer({
-            overrideBrowserslist: [
-                '>0.25%',
-                'not ie 11',
-                'not op_mini all'
-            ]
-        })
-    ];
-    return src(['node_modules/normalize.css/normalize.css'], { sourcemaps: true })
-        .pipe(postcss(plugins))
-        .pipe(concat('libs.min.css'))
-        .on('data', function(file) {
-            const buferFile = new CleanCSS(optionsCleanCSS).minify(file.contents)
-            return file.contents = Buffer.from(buferFile.styles)
-        })
-        .pipe(size(Object.assign(config_size, config_CSS1_size)))
-        .pipe(dest(config.build.style, { sourcemaps: '../sourcemaps/' }))
+  const plugins = [
+    autoprefixer({
+      overrideBrowserslist: ['>0.25%', 'not ie 11', 'not op_mini all'],
+    }),
+  ];
+  return src(['node_modules/normalize.css/normalize.css'], { sourcemaps: true })
+    .pipe(postcss(plugins))
+    .pipe(concat('libs.min.css'))
+    .on('data', function (file) {
+      const buferFile = new CleanCSS(optionsCleanCSS).minify(file.contents);
+      return (file.contents = Buffer.from(buferFile.styles));
+    })
+    .pipe(size(Object.assign(config_size, config_CSS1_size)))
+    .pipe(dest(config.build.style, { sourcemaps: '../sourcemaps/' }));
 }
 //—————————————————————— Подключаем JS файлы и минифицируем их в libs.min.js ——————————————————————
 function js() {
-    return src(['node_modules/jquery/dist/jquery.js'], { sourcemaps: true })
-        .pipe(babel({
-            presets: [babelPresetEnv]
-        }))
-        .pipe(concat('libs.min.js'))
-        .on('data', function(file) {
-            async function getJs() {
-                const result = await minify(file.contents.toString(), optionsTerser);
-                return await minify(result)
-            }
-            (async function() {
-                file.contents = Buffer.from(JSON.parse(Buffer.from(JSON.stringify(await getJs()))).code)
-            })();
-        })
-        .pipe(size(Object.assign(config_size, config_JS1_size)))
-        .pipe(dest(config.build.js, { sourcemaps: '../sourcemaps/' }))
+  return src(['node_modules/jquery/dist/jquery.js'], { sourcemaps: true })
+    .pipe(
+      babel({
+        presets: [babelPresetEnv],
+      })
+    )
+    .pipe(concat('libs.min.js'))
+    .on('data', function (file) {
+      async function getJs() {
+        const result = await minify(file.contents.toString(), optionsTerser);
+        return await minify(result);
+      }
+      (async function () {
+        file.contents = Buffer.from(JSON.parse(Buffer.from(JSON.stringify(await getJs()))).code);
+      })();
+    })
+    .pipe(size(Object.assign(config_size, config_JS1_size)))
+    .pipe(dest(config.build.js, { sourcemaps: '../sourcemaps/' }));
 }
 
 // Очищаем папку build перед каждым запуском сборки.
-function clear() {
-    return del(build)
+async function clear() {
+  await deleteAsync(build);
 }
 
+// function deleteFolderRecursive(folderPath) {
+//   if (fs.existsSync(folderPath)) {
+//     fs.readdirSync(folderPath).forEach(file => {
+//       const curPath = path.join(folderPath, file);
+
+//       if (fs.lstatSync(curPath).isDirectory()) {
+//         // Рекурсивное удаление подпапок
+//         deleteFolderRecursive(curPath);
+//       } else {
+//         // Удаление файла
+//         fs.unlinkSync(curPath);
+//       }
+//     });
+
+//     // Удаление пустой папки
+//     fs.rmdirSync(folderPath);
+//   }
+// }
+
+// function clear() {
+//   deleteFolderRecursive(build);
+// }
+
+// clear();
+
 function stream() {
-    browserSync.init({
-            server: build, // Запускаем сервер из папки build, уже сгенерированный сайт.
-            host: 'localhost', // Переопределить определение хоста, если вы знаете правильный IP-адрес для использования.
-            notyfy: false, // Не показывать уведомления в браузере. Небольшие всплывающие уведомления.
-            browser: "chrome", // Откройте сайт в Chrome.
-            logPrefix: 'My Project:', // Измените префикс ведения журнала консоли. Полезно, если вы создаете свой собственный проект на основе Browsersync.
-            logLevel: 'info', // Просто покажите основную информацию.
-            open: "local", // Откройте URL-адрес localhost. Решите, какой URL-адрес будет открываться автоматически при запуске Browsersync.
-            port: 8080 // Использовать определенный порт (вместо того, который автоматически определяется Browsersync).
-        })
-        // Следит за обновлениями html, scss и п.р. файлов. Если произошли изменения тогда вызываем задачу series(). И перезагружаем сервер.
-    watch(config.watch.html, series(html)).on('change', browserSync.reload)
-    watch(config.watch.style, series(scss)).on('change', browserSync.reload)
-    watch(config.watch.style, series(css)).on('change', browserSync.reload)
-    watch(config.watch.js, series(javaScript)).on('change', browserSync.reload)
-    watch(config.watch.js, series(js)).on('change', browserSync.reload)
-    watch(config.watch.fonts, series(fontConverter)).on('change', browserSync.reload)
-    watch(config.watch.img, series(imgConverter)).on('change', browserSync.reload)
+  browserSync.init({
+    server: build, // Запускаем сервер из папки build, уже сгенерированный сайт.
+    host: 'localhost', // Переопределить определение хоста, если вы знаете правильный IP-адрес для использования.
+    notyfy: false, // Не показывать уведомления в браузере. Небольшие всплывающие уведомления.
+    browser: 'chrome', // Откройте сайт в Chrome.
+    logPrefix: 'My Project:', // Измените префикс ведения журнала консоли. Для включения нужно использовать: notify: true.
+    notify: false, // Отключает надпись в правом верхнем углу экрана "browserSync:: connected"
+    logLevel: 'info', // Просто покажите основную информацию.
+    open: 'local', // Откройте URL-адрес localhost. Решите, какой URL-адрес будет открываться автоматически при запуске Browsersync.
+    port: 8080, // Использовать определенный порт (вместо того, который автоматически определяется Browsersync).
+  });
+  // Следит за обновлениями html, scss и п.р. файлов. Если произошли изменения тогда вызываем задачу series(). И перезагружаем сервер.
+  watch(config.watch.html, series(html)).on('change', browserSync.reload);
+  watch(config.watch.style, series(scss)).on('change', browserSync.reload);
+  watch(config.watch.style, series(css)).on('change', browserSync.reload);
+  watch(config.watch.js, series(javaScript)).on('change', browserSync.reload);
+  watch(config.watch.js, series(js)).on('change', browserSync.reload);
+  watch(config.watch.fonts, series(fontConverter)).on('change', browserSync.reload);
+  watch(config.watch.img, series(imgConverter)).on('change', browserSync.reload);
 }
 
 // Экспортируем задачи для сборки проекта или запуска в режиме разработки.
-async function builds() { await clear(), await fontConverter(), await html(), scss(), css(), javaScript(), js(), imgConverter() }
-export { builds }
-async function streams() { await clear(), await fontConverter(), await html(), scss(), css(), javaScript(), js(), imgConverter(), stream() }
-export { streams }
+async function builds() {
+  await clear(), fontConverter(), await html(), scss(), css(), javaScript(), js(), imgConverter();
+}
+export { builds }; // Запуск режима сборки: gulp builds
+// ======================================================================
+async function streams_builds() {
+  fontConverter(), await html(), scss(), css(), javaScript(), js(), imgConverter();
+}
+
+async function streams() {
+  await clear(), fontConverter(), await html(), scss(), css(), javaScript(), js(), imgConverter(), stream();
+}
+export { streams }; // Запуск режима разработки: gulp streams
+// ======================================================================
+async function streams_and_building() {
+  await clear(), fontConverter(), await html(), scss(), css(), javaScript(), js(), imgConverter(), stream(), await streams_builds();
+}
+export default streams_and_building; // Запуск режима разработки и одновременной сборки: gulp
